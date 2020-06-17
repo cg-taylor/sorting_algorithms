@@ -1,68 +1,70 @@
 #include "sort.h"
 
 /**
- * insertion_sort_list - sort a list using the insertion sort algorithm
- * @list: the doubly linked list of integers to sort
- *
- * Description: sort a doubly linked list of integers in ascending order
+ * swap_node - swap two nodes in a doubly linked list
+ * @a: address of the first node
+ * @b: address of the second node
  *
  * Return: void
  */
 
-void insertion_sort_list(listint_t **list)
+void swap(listint_t *big, listint_t *small)
 {
-	/* verify list and *list */
-	if (!list || !*list)
-		return;
-	/* keep track of head */
-	/* start at second node */
-	listint_t *h;
-	listint_t *current;
-	listint_t *position;
-	listint_t *temp = NULL;
-
-	h = *list;
-	current = h->next;
-	position = current->next;
-
-	while (position)
-	{
-		current = position;
-		position = current->next;
-		while (current->n < current->prev->n)
-		{
-			/* if swap is with head node, reset head */
-			if (current->prev == h)
-				h = current;
-			temp = current->prev;
-			current->prev = current->prev->prev;
-			current->prev->next = current->next;
-			temp->prev = current;
-			current->next = temp;
-			current->prev->next = current;
-			temp->next->prev = temp;
-		}
-		print_list(*list);
-	}
-
-
-	/* second pointer to keep track of where I left off */
-	/* print list each time */
-
-	/* when pos == NULL, done */
+	/* if big is not the first node */
+	if (big->prev)
+		big->prev->next = small;
+	/* if small is not the last node */
+	if (small->next)
+		small->next->prev = big;
+	big->next = small->next;
+	small->prev = big->prev;
+	big->prev = small;
+	small->next = big;
 }
 
-
 /**
-keep track of head
-start at second node
-variables -- head, current, position
-is current == NULL
-if current < current->prev, swap
-compare to next on left, swap until current > current->prev or current->prev == NULL
-if swap is with head node, set head to the swapped node
-print list if there's a swap
-move current to position
-move position forward, is position == NULL
-when position == NULL, done
-**/
+ * insertion_sort_list - sort a doubly linked list using insertion sort
+ * @list: the list of integers to be sorted
+ *
+ * Description: Use the insertion sort algorithm to sort a doubly linked list
+ * of integers in ascending order. Print the whole list each time two nodes are
+ * swapped to show how the sort progresses.
+ */
+
+void insertion_sort_list(listint_t **list)
+{
+	listint_t *nextNode, *current;
+
+	if (!list || !*list || !(*list)->next)
+		return;
+
+	/*
+	 * set tracking pointer to the second node in the list
+	 * because we start by comparing the second node to the first
+	 */
+	nextNode = (*list)->next;
+	while (nextNode)
+	{
+		/* move pointers to the next pair of nodes */
+		current = nextNode;
+		nextNode = nextNode->next;
+		/* while the node we're working with isn't NULL */
+		while (current && current->prev)
+		{
+			/* if previous node's value > current node's value */
+			if (current->prev->n > current->n)
+			{
+				swap(current->prev, current);
+				/*
+				 * if the prev pointer is NULL, current is now
+				 * the head of the list, reset list pointer
+				 */
+				if (!current->prev)
+					*list = current;
+				print_list(*list);
+			}
+			else
+				current = current->prev;
+		}
+	}
+}
